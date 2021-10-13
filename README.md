@@ -43,3 +43,29 @@ Configuration and status registers are exposed using Etherbone.
 The Hub75Controller reads frames from DRAM into row buffers. Hub75Drivers
 send the row buffers to the panels. Then the Hub75Controller drives the latch,
 row address, and output enable signals.
+
+# Installation
+
+To flash the prebuilt bit file to the board use a JTAG programmer and
+compatible software.
+
+For example, it is possible to use an FTDI 232 breakout board and
+openFPGALoader: `openFPGALoader -cft232 --freq 10M --write-flash
+prebuilt/colorlight_5a_75b.bit`
+
+Then generate a config file to specify the IP Address: `python3
+tools/make_config.py --eth-ip 192.168.0.39 --format bin`
+
+And finally flash the config to the board at address 4000000: `openFPGALoader
+-cft232 --freq 10M --write-flash --offset 4000000 config.bin`
+
+# Testing
+
+Once the gateware and config have been flashed, the board should be on
+available on the network. This can be tested with ping e.g. `ping 192.168.0.39`
+
+The display can be enabled with the sender75.py tool: `./tools/sender75.py
+--eth-ip 192.168.0.39 --enable`
+
+The sender75.py tool can also send some test patterns: `./tools/sender75.py
+--eth-ip 192.168.0.39 --solid 0xffffff`

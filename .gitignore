@@ -1,1 +1,3 @@
 gateware/build
+config.bin
+config.hex
