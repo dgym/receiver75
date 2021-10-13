@@ -20,7 +20,7 @@ class Hub75Controller(Module, CSRMixin):
         bank = Signal(1)
         self.enable = Signal()
         cycle_counter = Signal(32)
-        self.cycle_length = Signal(32, reset=5000)
+        self.cycle_length = Signal(32, reset=5100)
 
         self.buffers_written = Signal(2)
         self.buffers_read = Signal(2)

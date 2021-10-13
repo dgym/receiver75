@@ -19,7 +19,7 @@ class UdpDramWriter(Module, csr.AutoCSR):
         renamer = ClockDomainsRenamer({'write': 'eth_rx', 'read': 'eth_rx', 'sys': 'eth_rx'})
         fifo_layout = [("data", 32), ("end", 1)]
         self.submodules.fifo = fifo = renamer(stream.AsyncFIFO(fifo_layout, 256*4))
-        self.submodules.udp_delay = renamer(BatchLimiter(fifo_layout, 257, 256, 128, True))
+        self.submodules.udp_delay = renamer(BatchLimiter(fifo_layout, 257, 48, 48, True))
 
         self.comb += udp_port.source.connect(sink)
 

@@ -90,7 +90,7 @@ class RowFiller(Module, csr.AutoCSR):
         layout = [('address', dma.sink.address.nbits)]
         self.dma = dma
         self.submodules.addr_counter = StreamCounter(layout)
-        self.submodules.delay = BatchLimiter(layout, 257, 256, 128, True)
+        self.submodules.delay = BatchLimiter(layout, 257, 12, 12, True)
 
         # Stream writing
         self.sinks = sinks
