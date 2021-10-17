@@ -1,0 +1,1 @@
+-e git+https://github.com/enjoy-digital/litex@2628140e8ad37621261adaa37ad6e1899eba6779#egg=litex

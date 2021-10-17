@@ -9,6 +9,7 @@
 #include <liblitedram/sdram.h>
 
 
+#ifdef CSR_SPIFLASH_SPI_MOSI_ADDR
 static uint32_t spi_flash_read(uint32_t addr) {
     // select
     spiflash_spi_cs_write(1);
@@ -25,6 +26,7 @@ static uint32_t spi_flash_read(uint32_t addr) {
 
     return csr_read_simple(CSR_SPIFLASH_SPI_MISO_ADDR + 4);
 }
+#endif
 
 
 int main(int i, char **c)
@@ -37,6 +39,7 @@ int main(int i, char **c)
     uart_init();
 #endif
 
+#ifdef CSR_SPIFLASH_SPI_MOSI_ADDR
     uint32_t config_idx = 4000000;
 
     uint32_t ip_addr = 0;
@@ -55,6 +58,7 @@ int main(int i, char **c)
 
     hub75_soc_mac_address_write(mac_addr);
     hub75_soc_ip_address_write(ip_addr);
+#endif
 
     sdram_init();
 
@@ -64,6 +68,8 @@ int main(int i, char **c)
     return 0;
 }
 
+
+void isr(void);
 
 void isr(void) {
 }

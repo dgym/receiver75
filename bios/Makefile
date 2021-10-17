@@ -21,9 +21,9 @@ bios.elf: $(BIOS_DIRECTORY)/linker.ld $(OBJECTS)
 
 vpath %.a $(PACKAGES:%=../%)
 
-%.elf: ../libbase/crt0.o $(LIBS:%=%.a)
+%.elf: crt0.o $(LIBS:%=%.a)
 	$(CC) $(LDFLAGS) -T $(BIOS_DIRECTORY)/linker.ld -N -o $@ \
-		../libbase/crt0.o \
+		crt0.o \
 		$(OBJECTS) \
 		$(PACKAGES:%=-L../%) \
 		-Wl,--whole-archive \
