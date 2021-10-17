@@ -14,6 +14,7 @@ class Hub75Controller(Module, CSRMixin):
         self.submodules.row_filler = row_filler
 
         self.base_addr = Signal(32, reset=base)
+        self.current_addr = Signal(32, reset=base)
 
         filler_state = Signal()
         row = Signal(5)
@@ -28,7 +29,7 @@ class Hub75Controller(Module, CSRMixin):
         max_buffers = 2 if driver.dbl_buf else 1
 
         self.comb += [
-            self.row_filler.base_addr.eq(self.base_addr),
+            self.row_filler.base_addr.eq(self.current_addr),
             self.row_filler.row.eq(row),
             self.driver.bank.eq(bank),
             self.buffers_av.eq(self.buffers_written - self.buffers_read),
@@ -43,6 +44,9 @@ class Hub75Controller(Module, CSRMixin):
                 self.buffers_written.eq(0),
                 self.row_filler.bank.eq(0),
                 row.eq(driver.addr),#+1),
+            ),
+            If(row == 0,
+                self.current_addr.eq(self.base_addr),
             ),
         ).Elif(~self.row_filler.busy,
             self.buffers_written.eq(self.buffers_written+1),
