@@ -148,7 +148,7 @@ class Receiver75(SoCCore):
             dbl_buf=True,
         )
 
-        port = self.sdram.crossbar.get_port(data_width=32)
+        port = self.sdram.crossbar.get_port(data_width=64)
         self.submodules.dma_reader = LiteDRAMDMAReader(port, 8)
 
         self.submodules.writers = [
@@ -253,7 +253,7 @@ def main():
     )
     parser.add_argument(
         "--sdram-rate",
-        default="1:1",
+        default="1:2",
         help="SDRAM Rate: 1:1 Full Rate, 1:2 Half Rate",
     )
     builder_args(parser)

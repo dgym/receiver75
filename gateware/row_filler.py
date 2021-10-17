@@ -89,8 +89,9 @@ class RowFiller(Module, csr.AutoCSR):
         # Stream reading
         layout = [('address', dma.sink.address.nbits)]
         self.dma = dma
+        self.submodules.dma_converter = stream.Converter(64, 32)
         self.submodules.addr_counter = StreamCounter(layout)
-        self.submodules.delay = BatchLimiter(layout, 257, 12, 12, True)
+        self.submodules.delay = BatchLimiter(layout, 257, 12*2, 12, True)
 
         # Stream writing
         self.sinks = sinks
@@ -107,7 +108,8 @@ class RowFiller(Module, csr.AutoCSR):
 
             self.addr_counter.source.connect(self.delay.sink),
             self.delay.source.connect(self.dma.sink),
-            self.dma.source.connect(self.dem.sink, omit=['address']),
+            self.dma.source.connect(self.dma_converter.sink, omit=['address']),
+            self.dma_converter.source.connect(self.dem.sink),
             self.dem.sink.address.eq(
                 self.addr + scale(self.bank<<1)
             ),
@@ -140,8 +142,8 @@ class RowFiller(Module, csr.AutoCSR):
 
             next = [
                 self.addr_counter.begin(),
-                self.addr_counter.start.eq(s),
-                self.addr_counter.count.eq(depth),
+                self.addr_counter.start.eq(s>>1),
+                self.addr_counter.count.eq(depth>>1),
                 self.dem.sel.eq(d),
                 self.state.eq(idx+1),
             ]

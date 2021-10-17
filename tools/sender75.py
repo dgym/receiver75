@@ -91,10 +91,6 @@ def draw_panel(eth_ip, im, panel=0):
             (eth_ip, 4343),
         )
 
-    # Sending data too quickly impacts the output timing, give the
-    # card some processing time after each panel's data has been sent.
-    time.sleep(0.0001)
-
 
 def draw_all_panels(eth_ip, im, bank=0):
     for panel in range(16):
