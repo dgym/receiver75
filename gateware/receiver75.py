@@ -38,6 +38,7 @@ from hub75_controller import Hub75Controller
 from row_filler import RowFiller
 from mem_stream import MemStreamWriter
 from udp_dram_writer import UdpDramWriter
+from udp_wishbone_writer import UdpWishboneWriter
 
 
 class _CRG(colorlight_5a_75x._CRG):
@@ -103,13 +104,11 @@ class Receiver75(SoCCore):
                 tx_delay   = 0e-9)
             if with_ethernet:
                 self.add_ethernet(phy=self.ethphy)
-
-            if with_etherbone:
-                self.add_etherbone(phy=self.ethphy,
+                self.add_udp(phy=self.ethphy,
                     mac_address=self.hub75_soc.mac_address.storage,
                     ip_address=self.hub75_soc.ip_address.storage)
             else:
-                self.add_udp(phy=self.ethphy,
+                self.add_etherbone(phy=self.ethphy,
                     mac_address=self.hub75_soc.mac_address.storage,
                     ip_address=self.hub75_soc.ip_address.storage)
 
@@ -167,10 +166,15 @@ class Receiver75(SoCCore):
             with_csr=True,
         )
 
-        # UDP -> memory
         if with_ethernet or with_etherbone:
+            # UDP -> DRAM
             self.submodules.mem_streamer = UdpDramWriter(
                 self.sdram, self.ethcore.udp, 4343,
+            )
+
+            # UDP -> Wishbone
+            self.submodules.udp_wishbone_writer = UdpWishboneWriter(
+                self.bus, self.ethcore.udp, 4344,
             )
 
         # SPI flash for config
@@ -267,8 +271,8 @@ def main():
 
     soc = Receiver75(board=args.board, revision=args.revision,
         sys_clk_freq=int(float(args.sys_clk_freq)),
-        with_ethernet=False,
-        with_etherbone=True,
+        with_ethernet=True,
+        with_etherbone=False,
         eth_ip=args.eth_ip,
         eth_phy=args.eth_phy,
         use_internal_osc=True,

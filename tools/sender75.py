@@ -48,11 +48,19 @@ def poke(eth_ip, addr, *vals):
 
     sock = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     for val in vals:
-        sock.sendto(
-            struct.pack('!IIIII', 0x4e6f1044, 0, 0x00ff0100, addr, val),
-            (eth_ip, 1234),
-        )
+        sock.sendto(struct.pack('<II', addr>>2, val), (eth_ip, 4344))
         addr += 4
+
+
+def set_base_addr(eth_ip, addr):
+    poke(eth_ip, 'hub75_controller_base_addr', addr)
+
+
+def show_bank(eth_ip, bank):
+    # 48 integers per row
+    # 64 rows per panel
+    # 16 panels per bank
+    set_base_addr(eth_ip, bank*48*64*16)
 
 
 def process_image(im, gamma=2.5, scales=[1, 1, 1]):
@@ -88,9 +96,9 @@ def draw_panel(eth_ip, im, panel=0):
     time.sleep(0.0001)
 
 
-def draw_all_panels(eth_ip, im):
+def draw_all_panels(eth_ip, im, bank=0):
     for panel in range(16):
-        draw_panel(eth_ip, im, panel)
+        draw_panel(eth_ip, im, panel + bank*16)
 
 
 def main():
@@ -104,6 +112,7 @@ def main():
     parser.add_argument('--disable', action='store_true')
     parser.add_argument('--enable', action='store_true')
     parser.add_argument('--brightness', type=int)
+    parser.add_argument('--bank', type=int, default=0)
     if np is not None:
         parser.add_argument('--solid')
     args = parser.parse_args()
@@ -127,7 +136,9 @@ def main():
             rgb & 0xff,
         ]
         im = process_image(im)
-        draw_all_panels(args.eth_ip, im)
+        draw_all_panels(args.eth_ip, im, args.bank)
+
+    show_bank(args.eth_ip, args.bank)
 
     if args.enable:
         poke(args.eth_ip, lookup_csr('hub75_controller_enable'), 1)

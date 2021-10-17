@@ -38,7 +38,7 @@ memory, then sends a command to update which area of memory to display.
 
 The UdpDramWriter module receives UDP packets and writes their content to DRAM.
 
-Configuration and status registers are exposed using Etherbone.
+Configuration and status registers can be set using UDP packets.
 
 The Hub75Controller reads frames from DRAM into row buffers. Hub75Drivers
 send the row buffers to the panels. Then the Hub75Controller drives the latch,
