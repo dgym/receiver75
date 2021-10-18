@@ -16,7 +16,7 @@ This gateware is currently hardcoded for panels with 64x64 LEDs. Patches to
 improve this would be welcome.
 
 This gateware is currently hardcoded to drive only two panels per
-connector. This is to enable a refresh rate of 400Hz. Again, making this
+connector. This is to enable a refresh rate of 500Hz. Again, making this
 configurable would be nice.
 
 This gateware exposes some configuration registers. These can be set by

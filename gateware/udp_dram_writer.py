@@ -9,7 +9,6 @@ from litedram.frontend.dma import LiteDRAMDMAWriter
 from litex.gen.common import reverse_bytes
 from litex.soc.interconnect import csr, stream
 
-from batch_limiter import BatchLimiter
 from utils import FastLatch
 
 
@@ -87,7 +86,7 @@ class ProtocolHandler(Module):
 
 class UdpDramWriter(Module, csr.AutoCSR):
     def __init__(self, sdram, udp, port_num):
-        # UDP port -> (eth_rx) FIFO (sys) -> UpConverter -> Limiter -> DMA writer
+        # UDP port -> (eth_rx) FIFO (sys) -> UpConverter -> DMA writer
         udp_port = udp.crossbar.get_port(port_num, dw=32)
 
         # FIFO
@@ -101,15 +100,10 @@ class UdpDramWriter(Module, csr.AutoCSR):
         converter = stream.Endpoint(dma_layout)
         self.submodules.handler = ProtocolHandler(fifo.source, converter)
 
-        # Limiter
-        self.submodules.udp_delay = BatchLimiter(dma_layout, 257, 256, 1, True)
-        self.connect_converter_to_limiter(converter, self.udp_delay)
-
         # DMA writer
         sdram_port = sdram.crossbar.get_port(mode='write', data_width=64)
         self.submodules.dma = LiteDRAMDMAWriter(sdram_port, fifo_depth=1, fifo_buffered=False)
-        self.connect_limiter_to_dma(self.udp_delay.source, self.dma.sink)
-        #self.connect_limiter_to_dma(converter, self.dma.sink)
+        self.comb += converter.connect(self.dma.sink)
 
     def connect_udp_to_fifo(self, udp, fifo, port_num):
         valid = Signal()
@@ -119,14 +113,4 @@ class UdpDramWriter(Module, csr.AutoCSR):
             fifo.sink.data.eq(udp.data),
             fifo.sink.end.eq(udp.last),
             udp.ready.eq(fifo.sink.ready),
-        ]
-
-    def connect_converter_to_limiter(self, converter, limiter):
-        self.comb += [
-            converter.connect(limiter.sink),
-        ]
-
-    def connect_limiter_to_dma(self, source, sink):
-        self.comb += [
-            source.connect(sink)
         ]

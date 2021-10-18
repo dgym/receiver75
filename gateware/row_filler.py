@@ -8,7 +8,6 @@ from migen import *
 from litex.soc.interconnect import csr, stream
 
 from csr_mixin import CSRMixin
-from batch_limiter import BatchLimiter
 from utils import FastLatch
 
 
@@ -91,7 +90,6 @@ class RowFiller(Module, csr.AutoCSR):
         self.dma = dma
         self.submodules.dma_converter = stream.Converter(64, 32)
         self.submodules.addr_counter = StreamCounter(layout)
-        self.submodules.delay = BatchLimiter(layout, 257, 12*2, 12, True)
 
         # Stream writing
         self.sinks = sinks
@@ -106,8 +104,7 @@ class RowFiller(Module, csr.AutoCSR):
         self.comb += [
             self.busy.eq(self.begin.out | (self.state != 0)),
 
-            self.addr_counter.source.connect(self.delay.sink),
-            self.delay.source.connect(self.dma.sink),
+            self.addr_counter.source.connect(self.dma.sink),
             self.dma.source.connect(self.dma_converter.sink, omit=['address']),
             self.dma_converter.source.connect(self.dem.sink),
             self.dem.sink.address.eq(
